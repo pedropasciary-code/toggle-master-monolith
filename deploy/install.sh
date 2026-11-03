@@ -30,5 +30,7 @@ nginx -t
 echo "==> Habilitando e iniciando"
 systemctl daemon-reload
 systemctl enable --now nginx togglemaster
+systemctl reload nginx
+systemctl restart togglemaster
 
 systemctl --no-pager status togglemaster | head -n 5
