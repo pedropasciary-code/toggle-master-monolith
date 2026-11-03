@@ -1,0 +1,19 @@
+[Unit]
+Description=ToggleMaster API (Flask + Gunicorn)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=ec2-user
+Group=ec2-user
+WorkingDirectory=/opt/togglemaster
+RuntimeDirectory=togglemaster
+RuntimeDirectoryMode=0700
+ExecStartPre=+/opt/togglemaster/deploy/load-secret.sh
+EnvironmentFile=/run/togglemaster/env
+ExecStart=/opt/togglemaster/deploy/start.sh
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
