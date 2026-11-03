@@ -10,10 +10,12 @@ DB_HOST = os.getenv("DB_HOST")
 DB_NAME = os.getenv("DB_NAME")
 DB_USER = os.getenv("DB_USER")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_PORT = os.getenv("DB_PORT", "5432")
 
 def get_db_connection():
     conn = psycopg2.connect(
         host=DB_HOST,
+        port=DB_PORT,
         database=DB_NAME,
         user=DB_USER,
         password=DB_PASSWORD
@@ -138,6 +140,25 @@ def update_flag(name):
             conn.close()
     
     return jsonify({"message": f"Flag '{name}' atualizada"}), 200
+
+@app.route('/flags/<string:name>', methods=['DELETE'])
+def delete_flag(name):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("DELETE FROM flags WHERE name = %s", (name,))
+        if cur.rowcount == 0:
+            return jsonify({"error": "Flag não encontrada"}), 404
+        conn.commit()
+    except Exception:
+        return jsonify({"error": "Erro interno no servidor ao remover a flag"}), 500
+    finally:
+        if 'cur' in locals() and not cur.closed:
+            cur.close()
+        if 'conn' in locals() and not conn.closed:
+            conn.close()
+
+    return jsonify({"message": f"Flag '{name}' removida"}), 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
